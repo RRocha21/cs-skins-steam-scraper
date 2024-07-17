@@ -7,11 +7,11 @@
   <br><br>
 </p>
 
-# Buff2steam
+# steam2buff
 
-[![Build and release](https://github.com/hldh214/buff2steam/actions/workflows/build-and-release.yml/badge.svg)](https://github.com/hldh214/buff2steam/actions/workflows/build-and-release.yml)
+[![Build and release](https://github.com/hldh214/steam2buff/actions/workflows/build-and-release.yml/badge.svg)](https://github.com/hldh214/steam2buff/actions/workflows/build-and-release.yml)
 
-Welcome to buff2steam, a Python script for finding items on buff that are cheaper than on Steam Community Market.
+Welcome to steam2buff, a Python script for finding items on buff that are cheaper than on Steam Community Market.
 This readme provides an overview of the project and instructions on how to use it.
 
 **Disclaimer**: Recently, some users have reported that their accounts were banned by Buff for using this project.
@@ -35,10 +35,10 @@ markdown-toc</a></i></small>
 
 ## Introduction
 
-buff2steam is a script, for crawling items from [buff](https://buff.163.com/) which cheaper
+steam2buff is a script, for crawling items from [buff](https://buff.163.com/) which cheaper
 than [steamcommunity](https://steamcommunity.com/market/).
 
-With buff2steam, you can crawl items on [buff](https://buff.163.com/) and compare their prices to those
+With steam2buff, you can crawl items on [buff](https://buff.163.com/) and compare their prices to those
 on [steamcommunity](https://steamcommunity.com/market/). After setting the `threshold` in the `config.json` file, the
 script will automatically calculate the price difference and filter out matching items.
 
@@ -60,7 +60,7 @@ Then you can buy items from buff manually and sell them to the steamcommunity.
 
 ## Requirements
 
-To use buff2steam, you need to have:
+To use steam2buff, you need to have:
 
 - `python >= 3.7`
 - `pip install --user pipenv`
@@ -75,23 +75,23 @@ export PYTHONUTF8=1
 
 # activate a new shell with pipenv
 pipenv shell
-python -m buff2steam
+python -m steam2buff
 
 # or run directly inside pipenv
-pipenv run python -m buff2steam
+pipenv run python -m steam2buff
 ```
 
 ## Run with Docker
 
-[![Docker Image](https://github.com/hldh214/buff2steam/actions/workflows/docker-image.yml/badge.svg)](https://github.com/hldh214/buff2steam/actions/workflows/docker-image.yml)
+[![Docker Image](https://github.com/hldh214/steam2buff/actions/workflows/docker-image.yml/badge.svg)](https://github.com/hldh214/steam2buff/actions/workflows/docker-image.yml)
 
 ```shell
 # Build image yourself
-docker buildx build -t buff2steam_local .
-docker run -e buff2steam_local
+docker buildx build -t steam2buff_local .
+docker run -e steam2buff_local
 
 # Or use prebuilt image
-docker run -it --name buff2steam --rm -v $PWD/config.json:/app/config.json ghcr.io/hldh214/buff2steam
+docker run -it --name steam2buff --rm -v $PWD/config.json:/app/config.json ghcr.io/hldh214/steam2buff
 ```
 
 ## Configuration
@@ -146,8 +146,8 @@ To set the `buff_session` field in `config.json`, follow these steps:
 
 ## StarChart
 
-![starchart](https://starchart.cc/hldh214/buff2steam.svg)
+![starchart](https://starchart.cc/hldh214/steam2buff.svg)
 
 ## License
 
-buff2steam is open-source software licensed under the Unlicense License. See the LICENSE file for more information.
+steam2buff is open-source software licensed under the Unlicense License. See the LICENSE file for more information.

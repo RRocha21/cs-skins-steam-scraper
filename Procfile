@@ -1,1 +1,1 @@
-worker: python buff2steam
+worker: python steam2buff

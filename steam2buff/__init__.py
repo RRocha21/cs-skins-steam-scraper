@@ -20,5 +20,5 @@ config = json.load(open(config_path))
 
 logger = loguru.logger
 logger.remove()
-# logger.add(os.path.join(base_path, 'buff2steam.log'), level='DEBUG' if config['main']['debug'] else 'INFO')
+# logger.add(os.path.join(base_path, 'steam2buff.log'), level='DEBUG' if config['main']['debug'] else 'INFO')
 logger.add(sys.stdout, level='DEBUG' if config['main']['debug'] else 'INFO')
