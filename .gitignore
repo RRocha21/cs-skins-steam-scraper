@@ -9,8 +9,8 @@ __pycache__/
 # C extensions
 *.so
 
-Pipfile.lock
-Pipfile
+# Pipfile.lock
+# Pipfile
 
 # Distribution / packaging
 .Python
@@ -89,10 +89,9 @@ celerybeat-schedule
 
 # Environments
 .env
-.venv
 env/
 venv/
-ENV/    
+ENV/
 env.bak/
 venv.bak/
 

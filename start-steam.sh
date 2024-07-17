@@ -3,7 +3,7 @@
 # Function to run a script and wait for it to finish
 run_script_and_wait() {
     echo "Starting script: $1"
-    ./Buff2Steam.sh
+    ./Steam2Buff.sh
 }
 
 # Function to run a script multiple times concurrently
@@ -30,7 +30,7 @@ monitor_and_maintain_tasks() {
         num_running_tasks=$(pgrep -c start.sh)
         
         # Calculate the number of tasks to add
-        tasks_to_add=$((20 - num_running_tasks))
+        tasks_to_add=$((125 - num_running_tasks))
         
         if [ "$tasks_to_add" -gt 0 ]; then
             echo "Adding $tasks_to_add new tasks..."
@@ -91,18 +91,18 @@ trap cleanup_and_exit SIGINT
 sudo systemctl start openvpn-server@server.service
 cd ../../../../home/rr/git/
 
-echo "Run the Buff2Steam.sh script..."
+echo "Run the Steam2Buff.sh script..."
 
 cd Buff.Steam-Proxy-Scraper || exit 1
-chmod +x Buff2Steam.sh
+chmod +x Steam2Buff.sh
 
-run_script_and_wait "Buff.Steam-Proxy-Scraper/Buff2Steam.sh"
+run_script_and_wait "Buff.Steam-Proxy-Scraper/Steam2Buff.sh"
 
 cd .. || exit 1
 
 echo "Running scripts concurrently..."
-cd Buff2Steam-Scraper || exit 1
+cd Steam2Buff-Scraper || exit 1
 chmod +x start.sh
-run_script_concurrently 20  # Start 100 tasks concurrently in the background
+run_script_concurrently 125  # Start 100 tasks concurrently in the background
 
 # Start monitoring and maintaining tasks

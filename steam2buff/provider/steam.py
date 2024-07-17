@@ -11,9 +11,6 @@ from aiohttp_socks import ProxyConnector
 
 import urllib.parse
 
-import decimal
-from buff2steam import logger
-
 def get_currency_from_id(currency_id):
     # Remove the first 2 characters from currency_id
     cleaned_currency_id = currency_id - 2000
@@ -135,14 +132,7 @@ def get_socks5_proxy():
 class Steam:
     base_url = 'https://steamcommunity.com'
     fee_rate = 0.13
-    web_sell = '/market/sellitem'
-    web_inventory = '/inventory/{steam_id}/{game_appid}/{context_id}'
     web_listings = '/market/listings/{game_appid}/{market_hash_name}'
-    web_item_orders_histogram = '/market/itemordershistogram'
-    web_search = '/market/search/render'
-
-    item_nameid_pattern = re.compile(r'Market_LoadOrderSpread\(\s*(\d+)\s*\)')
-    currency_pattern = re.compile(r'[^\d.]')
 
     def __init__(
             self, game_appid='',
@@ -227,7 +217,7 @@ class Steam:
             proxy = get_https_proxy()
             try:
                 connector = ProxyConnector.from_url(proxy)
-                timeout = aiohttp.ClientTimeout(total=10)
+                timeout = aiohttp.ClientTimeout(total=5)
                 async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
                     try:
                         headers = kwargs.pop('headers', {})  # Extract headers from kwargs, if present
@@ -255,7 +245,7 @@ class Steam:
             proxy = get_socks4_proxy()
             try:
                 connector = ProxyConnector.from_url(proxy)
-                timeout = aiohttp.ClientTimeout(total=10)
+                timeout = aiohttp.ClientTimeout(total=5)
                 async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
                     try:
                         headers = kwargs.pop('headers', {})  # Extract headers from kwargs, if present
@@ -283,7 +273,7 @@ class Steam:
             proxy = get_socks5_proxy()
             try:
                 connector = ProxyConnector.from_url(proxy)
-                timeout = aiohttp.ClientTimeout(total=10)
+                timeout = aiohttp.ClientTimeout(total=5)
 
                 async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
                     try:
@@ -319,7 +309,7 @@ class Steam:
         selected_proxy_function = random.choice(proxy_functions)
 
         tasks = []
-        for _ in range(25):
+        for _ in range(10):
             task = asyncio.create_task(selected_proxy_function(*args, **kwargs))
             tasks.append(task)
 
@@ -333,60 +323,47 @@ class Steam:
             return task.result() if task.result() else None
     
     async def _web_listings(self, market_hash_name):
-        return await self.fetch_with_multiple_proxies('GET', self.web_listings.format(market_hash_name=market_hash_name))
-        
-    async def _item_orders_histogram(self, item_nameid):        
-        return await self.fetch_with_multiple_proxies('GET', self.web_item_orders_histogram, params={
-            'language': 'english',
-            'currency': 23,
-            'item_nameid': item_nameid,
-            'norender': 1,
-            'country': 'UK',
-            'two_factor': 0
+
+        # Make the request using the selected proxy function
+        response = await self.fetch_with_multiple_proxies('GET', self.web_listings.format(market_hash_name=market_hash_name), params={
+            'start': 0,
+            'count': 10,
         })
 
-    async def _price_overview(self, market_hash_name):        
-        return await self.fetch_with_multiple_proxies('GET', '/market/priceoverview', params={
-            'appid': self.game_appid,
-            'market_hash_name': market_hash_name,
-            'currency': 23,
-        })
-
-    async def price_overview_data(self, market_hash_name):
-        res = json.loads((await self._price_overview(market_hash_name)))
-        
-        if 'lowest_price' not in res:
+        if response is None:
             return None
-
-        return {
-            'price': int(decimal.Decimal(self.currency_pattern.sub('', res['lowest_price'])) * 100),
-            'volume': int(res.get('volume', '0').replace(',', '')),
-        }
-        
-    async def get_item_nameid(self, market_hash_name):
-        res = await self._web_listings(market_hash_name)
-        item_nameid = self.item_nameid_pattern.findall(res)
-        
-        if not item_nameid:
+        if response == 'null':
             return None
-    
-        return item_nameid[0]    
-
-    async def orders_data(self, item_nameid):
-
-        res = await self._item_orders_histogram(item_nameid)
+        match = re.search(r'var g_rgListingInfo = ({.*?});', response)
+        listing_data = []
         
-        if not res:
+        if match:
+            raw_listing_data = json.loads(match.group(1))
+        
+            for listing_id, listing_info in raw_listing_data.items():
+                price = listing_info.get('price')
+                currency_id = listing_info.get('currencyid')
+                fee = listing_info.get('fee')
+                
+                link = listing_info.get('asset', {}).get('market_actions', [{}])[0].get('link')
+                asset_id = listing_info.get('asset', {}).get('id')
+
+                final_price = int(price) + int(fee)
+                final_price = final_price / 100
+                
+                currency = get_currency_from_id(currency_id)
+                
+                data = {
+                    'listing_id': listing_id,
+                    'final_price': final_price,
+                    'currency_id': currency,
+                    'asset_id': asset_id,
+                    'market_action_link': link,
+                }
+
+                listing_data.append(data)
+
+        if listing_data:
+            return listing_data
+        else:
             return None
-        
-        orders_data = json.loads(res)
-        
-        sell_order_count = str(orders_data['sell_order_count'])
-        buy_order_count = str(orders_data['buy_order_count'])
-
-        return {
-            'sell_order_count': int(sell_order_count.replace(',', '')),
-            'buy_order_count': int(buy_order_count.replace(',', '')),
-            'lowest_sell_order': int(orders_data['lowest_sell_order']),
-            'highest_buy_order': int(orders_data['highest_buy_order']),   
-        }

@@ -1,9 +1,3 @@
-tenacity
 loguru
-gspread
-oauth2client
-asyncpg
-psycopg2
 aiohttp
 aiohttp_socks
-httpx
